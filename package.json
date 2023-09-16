@@ -1,0 +1,55 @@
+{
+  "name": "flappyvault",
+  "description": "FlappyVault is a user-centric Ethereum-compatible wallet crafted to enhance the DeFi experience. With features such as batched private key imports and auto-transaction confirmations, we aim for a seamless and user-friendly crypto journey.",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "vbuild": "vite build",
+    "preview": "vite preview",
+    "rbuild": "rollup -c",
+    "start": "rollup -c -w",
+    "build": "vite build && rollup -c"
+  },
+  "dependencies": {
+    "@vueuse/core": "^10.1.2",
+    "@vueuse/integrations": "^10.1.2",
+    "clipboard": "^2.0.11",
+    "crypto-js": "^4.1.1",
+    "dexie": "^3.2.3",
+    "ethers": "^6.3.0",
+    "pinia": "^2.0.32",
+    "vue": "^3.2.47",
+    "vue-router": "^4.1.6"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.2",
+    "@rollup/plugin-node-resolve": "^15.1.0",
+    "@vicons/material": "^0.12.0",
+    "@vitejs/plugin-vue": "^4.1.0",
+    "naive-ui": "^2.34.3",
+    "rollup": "^3.26.0",
+    "rollup-plugin-chrome-extension": "^3.6.12",
+    "vfonts": "^0.0.3",
+    "vite": "^4.3.2",
+    "webextension-polyfill": "^0.10.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sudaoxyz/FlappyVault.git"
+  },
+  "keywords": [
+    "web3",
+    "extension",
+    "wallet",
+    "auto",
+    "ethereum",
+    "dapp"
+  ],
+  "author": "sudaoxyz",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/sudaoxyz/FlappyVault/issues"
+  },
+  "homepage": "https://github.com/sudaoxyz/FlappyVault#readme"
+}

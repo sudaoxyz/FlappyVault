@@ -1,0 +1,55 @@
+{
+	"manifest_version": 3,
+	"name": "FlappyVault",
+	"description": "FlappyVault是一个以用户为中心的以太坊兼容钱包，旨在提升 DeFi 体验。具有批量导入私钥和自动交易确认等功能，我们为用户提供了一个简单便捷的加密货币之旅。",
+	"version": "0.1.1",
+	"icons": {
+		"128": "icon128.png"
+	},
+	"action": {
+		"default_title": "连接你的Dapp"
+	},
+	"background": {
+		"service_worker": "background.js",
+		"type": "module"
+	},
+	"content_scripts": [
+		{
+			"matches": [
+				"file://*/*",
+				"http://*/*",
+				"https://*/*"
+			],
+			"js": [
+				"contentscript.js"
+			],
+			"run_at": "document_start",
+			"all_frames": true
+		}
+	],
+	"host_permissions": [
+		"http://localhost:8545/",
+		"file://*/*",
+		"http://*/*",
+		"https://*/*"
+	],
+	"permissions": [
+		"activeTab",
+		"clipboardWrite",
+		"storage",
+		"unlimitedStorage",
+		"debugger"
+	],
+	"web_accessible_resources": [
+		{
+			"use_dynamic_url": true,
+			"matches": [
+				"<all_urls>"
+			],
+			"resources": [
+				"lib/metamask_provider.js",
+				"lib/iframe.js"
+			]
+		}
+	]
+}
