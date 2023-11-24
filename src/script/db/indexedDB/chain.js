@@ -1,7 +1,7 @@
 import { db } from './schema'
 
 export const initChains = async () => {
-    await db.chain.bulkPut([Mainnet, zkSync, Goerli, scrollTestnet, zkSyncTestnet, Arbitrum, Linea, PolygonEvm, Base, Bsc, Optimism, Matic, Fantom])
+    await db.chain.bulkPut([Mainnet, zkSync, Goerli, Scroll, zkSyncTestnet, Arbitrum, Linea, PolygonEvm, Base, Bsc, Optimism, Matic, Fantom])
 }
 
 export const getChains = async () => {
@@ -30,7 +30,7 @@ export const Mainnet = {
     currency_name: "Ether",
     currency_symbol: "ETH",
     currency_decimals: 18,
-    rpc_url: "https://mainnet.infura.io/v3",
+    rpc_url: "http://127.0.0.1:8545",
     explorer_url: "https://etherscan.io"
 }
 
@@ -44,14 +44,14 @@ export const Goerli = {
     explorer_url: "https://goerli.etherscan.io"
 }
 
-export const scrollTestnet = {
-    chain_name: "Scroll Testnet",
-    chain_id: "0x82751",
+export const Scroll = {
+    chain_name: "Scroll",
+    chain_id: "0x82750",
     currency_name: "Ether",
     currency_symbol: "ETH",
     currency_decimals: 18,
-    rpc_url: "https://alpha-rpc.scroll.io/l2",
-    explorer_url: "https://blockscout.scroll.io"
+    rpc_url: "https://rpc.scroll.io/",
+    explorer_url: "https://scrollscan.com/"
 }
 
 export const zkSync = {

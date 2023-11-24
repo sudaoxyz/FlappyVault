@@ -6,7 +6,7 @@ let provider = null;
 
 export const initChainData = async () => {
     await db.initChains()
-    await db.initSetting(db.Goerli.chain_name)
+    await db.initSetting(db.Scroll.chain_name)
 }
 
 export const getProvider = async (sender) => {

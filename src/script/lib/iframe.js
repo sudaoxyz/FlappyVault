@@ -1,4 +1,5 @@
 console.log("iframe injected")
+// window.boternet = new URL(location.href).searchParams.get("boternet")
 
 window.addEventListener('message', async (event) => {
     if (!isParentToIframePage(event.data)) {
@@ -8,13 +9,22 @@ window.addEventListener('message', async (event) => {
     const msg = event.data
     try {
         const resp = await iframeService[msg.value.method](msg.value.params)
-        window.parent.postMessage(wrap('iframepage', 'parent', msg.id, resp), '*')
+        console.log("==============", msg, resp)
+        window.postMessage(wrapRes('iframepage', 'parent', msg.id, resp), '*')
     } catch (error) {
-        window.parent.postMessage(wrap('iframepage', 'parent', msg.id, { error: error.message }), '*')
+        window.postMessage(wrapRes('iframepage', 'parent', msg.id, { error: error.message }), '*')
     }
 })
 
 const iframeService = {
+    getText: async (params) => {
+        const element = await waitForSelector(params.selector)
+        return element.innerText
+    },
+    fetchJson: async (params) => {
+        const resp = await fetch(params.url, params.options)
+        return resp.json()
+    },
     getPosition: async (params) => {
         const element = await waitForSelector(params.selector)
         const rect = element.getBoundingClientRect()
@@ -84,6 +94,10 @@ const isParentToIframePage = (msg) => {
 
 const wrap = (from, to, id, value, err) => {
     return { from: from, to: to, id: id, value: value, err: err }
+}
+
+const wrapRes = (from, to, id, value, err) => {
+    return { from: from, to: to, id: id, value: value, isRes: true, err: err }
 }
 
 const _getScrollDelta = (element) => {

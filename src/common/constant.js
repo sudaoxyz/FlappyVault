@@ -5,6 +5,9 @@ export const Role = {
     Inpage: "sw-inpage",
 
     Iframe: "sw-iframe",
+    Iframepage: "iframepage",
+    Iframecontent: "iframecontent",
+    Parent: "parent",
 
     PROVIDER: 'metamask-provider',
     CONTENT_SCRIPT: 'metamask-contentscript',

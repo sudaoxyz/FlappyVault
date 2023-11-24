@@ -77,3 +77,7 @@ export const isp2b = (msg) => {
     if (!msg) { return false }
     return msg.from == Role.Popup && msg.to == Role.Background
 }
+
+export const isIframeContentToParent = (msg) => { return !!msg ? msg.from == Role.Iframecontent && msg.to == Role.Parent : false }
+export const isParentToIframePage = (msg) => { return !!msg ? msg.from == Role.Parent && msg.to == Role.Iframepage : false }
+export const isParentToIframeContent = (msg) => { return !!msg ? msg.from == Role.Parent && msg.to == Role.Iframecontent : false }

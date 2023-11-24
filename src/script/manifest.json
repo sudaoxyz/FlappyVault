@@ -34,7 +34,7 @@
 		"https://*/*"
 	],
 	"permissions": [
-		"activeTab",
+		"tabs",
 		"clipboardWrite",
 		"storage",
 		"unlimitedStorage",
