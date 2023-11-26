@@ -47,8 +47,11 @@
 				"<all_urls>"
 			],
 			"resources": [
-				"lib/metamask_provider.js",
-				"lib/iframe.js"
+				"lib/inpage_base.js",
+				"lib/inpage_boter.js",
+				"lib/inpage_controller.js",
+				"lib/okwallet_provider.js",
+				"lib/metamask_provider.js"
 			]
 		}
 	]

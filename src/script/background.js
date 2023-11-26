@@ -1,77 +1,99 @@
-import * as service from "./service"
-import { withMiddlewares } from "./middleware"
-import { isc2b, isp2b, isIframeContentToParent, isParentToIframePage, isParentToIframeContent, anyMsg, anyErr } from "../common/wrap"
-import { checkConfirm } from "./middleware/confirm"
-
-// chrome.storage.local.clear()
-chrome.action.setPopup({ popup: "src/ui/popup/index.html" })
-
+// const data = {
+//     id: 0,
+//     target:'',
+//     to: 0,
+//     from: 0,
+//     type:"req\resp"
+//     taskId:0,
+//     name: "boternet-provider",
+//     method: "",
+//     params: "",
+//     result: "",
+//     err:"",
+//     return: true
+// }
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-    if (!isc2b(msg) && !isp2b(msg) && !isIframeContentToParent(msg) && !isParentToIframePage(msg) && !isParentToIframeContent(msg)) { return false }
-
-    let middlewares = [];
-    if (isc2b(msg)) {
-        middlewares = [checkConfirm]
-    }
-
-    withMiddlewares(msg, sender, sendResponse, excute, middlewares).catch(error => {
-        console.log("background middlewares: ", error, msg)
-    })
-
-    return true
-})
-
-chrome.runtime.onInstalled.addListener(() => {
-    service.initChainData().then(() => {
-        console.log("chain setting inited")
-    })
-})
-
-const excute = async (msg, sender, sendResponse) => {
-    let method = null
-    console.log("|||||||||| - excute excute msg", msg)
-    if (isIframeContentToParent(msg)) {
-        console.log("3333333333333333 - excute isIframeContentToParent req", msg)
-        const resp = await chrome.tabs.sendMessage(Number(msg.value.boternet), msg)
-        console.log("77777777777777 - excute isIframeContentToParent resp", resp)
-        return sendResponse(resp)
-    } else if (isParentToIframePage(msg)) {
-        console.log("ddddddddddddddd - excute isParentToIframePage req", msg)
-        const resp = await chrome.tabs.sendMessage(Number(msg.boterId), msg)
-        console.log("eeeeeeeeeeeeee - excute isParentToIframePage resp", resp)
-        return sendResponse(resp)
-    } else if (isParentToIframeContent(msg)) {
-        console.log("contentddddddddddddddd - excute isParentToIframecontent req", msg)
-        const resp = await chrome.tabs.sendMessage(Number(msg.value.boterId), msg)
-        console.log("contenteeeeeeeeeeeeee - excute isParentToIframecontent resp", resp)
-        return sendResponse(resp)
-    } else if (isc2b(msg)) {
-        method = service.external[msg.value.method] || service.command[msg.value.method]
+    console.log("11111111", msg)
+    if (msg && msg.to) {
+        msg.from = sender.tab.id
+        chrome.tabs.sendMessage(Number(msg.to), msg)
+        return false
     } else {
-        method = service[msg.value.method]
-    }
+        msg.type = 'resp'
+        const method = service[msg.method]
+        if (!method) {
+            msg.err = new Error("unsupported method")
+            sendResponse(msg)
+        } else {
+            method(msg, sender).then((resp) => {
+                msg.result = resp
+                sendResponse(msg)
+            }).catch(err => {
+                msg.err = err
+                sendResponse(msg)
+            })
+        }
 
-    if (!method) {
-        return sendResponse(anyErr(msg.id, new Error("unsupported method")))
+        return true
     }
+})
 
-    try {
-        const resp = await method(msg.value.params, sender)
-        console.log("excute resp", msg, resp)
-        formatLog(msg, resp, null)
-        sendResponse(anyMsg(msg.id, resp))
-    } catch (error) {
-        formatLog(msg, null, error)
-        sendResponse(anyErr(msg.id, error))
+const service = {
+    getTabId: async (msg, sender) => {
+        return sender.tab.id
+    },
+    open_page: async (msg, sender) => {
+        const params = msg.params
+        console.log('open_page', params)
+
+        const tab = await chrome.tabs.create({})
+        const data = {}
+        data[tab.id] = {
+            type: "boter",
+            controller: sender.tab.id,
+            taskId: params.taskId,
+            provider: params.provider
+        }
+
+        await chrome.storage.local.set(data)
+        await chrome.tabs.update(tab.id, { url: params.url })
+
+        return { boterId: tab.id, boternet: sender.tab.id }
+    },
+
+    attach: async (msg, sender) => {
+        await chrome.debugger.attach({ tabId: sender.tab.id }, '1.3')
+    },
+    detach: async (msg, sender) => {
+        await chrome.debugger.detach({ tabId: sender.tab.id })
+    },
+    focus: async (msg, sender) => {
+        const params = msg.params
+        const options = { type: 'mousePressed', x: params.x, y: params.y, button: 'left', clickCount: 3 }
+        await chrome.debugger.sendCommand({ tabId: sender.tab.id }, "Input.dispatchMouseEvent", options)
+    },
+    click: async (msg, sender) => {
+        const params = msg.params
+        const mouseDown = { type: 'mousePressed', x: params.x, y: params.y, button: 'left', clickCount: 1 }
+        await chrome.debugger.sendCommand({ tabId: sender.tab.id }, "Input.dispatchMouseEvent", mouseDown)
+        const mouseUp = { type: 'mouseReleased', x: params.x, y: params.y, button: 'left' }
+        await chrome.debugger.sendCommand({ tabId: sender.tab.id }, "Input.dispatchMouseEvent", mouseUp)
+    },
+    input: async (msg, sender) => {
+        const params = msg.params
+        for (const c of params.text) {
+            const options = { type: 'keyDown', text: c, isKeypad: true }
+            await chrome.debugger.sendCommand({ tabId: sender.tab.id }, "Input.dispatchKeyEvent", options)
+        }
+    },
+    scroll_page: async (msg, sender) => {
+        const params = msg.params
+        const option = { type: 'mouseWheel', x: params.x + 1, y: params.y + 1, deltaX: params.deltaX, deltaY: params.deltaY }
+        await chrome.debugger.sendCommand({ tabId: sender.tab.id }, "Input.dispatchMouseEvent", option)
+    },
+    fetchJson: async (msg, sender) => {
+        const params = msg.params
+        const resp = await fetch(params.url, params.options)
+        return resp.json()
     }
-}
-
-const formatLog = (msg, resp, error) => {
-    console.log('%s(%s) return %s [%s] | %s->%s',
-        msg.value.method,
-        msg.value.params ? JSON.stringify(msg.value.params) : '',
-        resp === '' ? resp : JSON.stringify(resp),
-        error ? `error:${error}` : 'success',
-        msg.from.substring('sw-'.length),
-        msg.to.substring('sw-'.length))
 }
