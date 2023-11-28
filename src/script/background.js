@@ -1,19 +1,5 @@
-// const data = {
-//     id: 0,
-//     target:'',
-//     to: 0,
-//     from: 0,
-//     type:"req\resp"
-//     taskId:0,
-//     name: "boternet-provider",
-//     method: "",
-//     params: "",
-//     result: "",
-//     err:"",
-//     return: true
-// }
+chrome.action.setPopup({ popup: "src/ui/popup/index.html" })
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-    console.log("11111111", msg)
     if (msg && msg.to) {
         msg.from = sender.tab.id
         chrome.tabs.sendMessage(Number(msg.to), msg)
@@ -50,6 +36,7 @@ const service = {
         const data = {}
         data[tab.id] = {
             type: "boter",
+            boter: tab.id,
             controller: sender.tab.id,
             taskId: params.taskId,
             provider: params.provider

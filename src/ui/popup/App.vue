@@ -1,24 +1,30 @@
 <script setup>
-import { NLayout, NLayoutHeader, NLayoutContent, NMessageProvider, NDialogProvider, NConfigProvider, zhCN, dateZhCN } from "naive-ui"
-import Header from '../components/Header.vue'
-import { RouterView } from 'vue-router'
-
 </script>
+
 <template>
-  <n-config-provider :locale="zhCN" :date-locale="dateZhCN">
-    <n-layout>
-      <n-layout-header>
-        <Header></Header>
-      </n-layout-header>
-      <n-layout-content content-style="height: 417px;">
-        <n-message-provider closable>
-          <n-dialog-provider>
-            <RouterView />
-          </n-dialog-provider>
-        </n-message-provider>
-      </n-layout-content>
-    </n-layout>
-  </n-config-provider>
+  <div class="container box center column">
+    欢迎加入boternet
+  </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.box {
+  display: flex;
+  box-sizing: border-box;
+}
+
+.center {
+  justify-content: center;
+  align-items: center;
+}
+
+.column {
+  flex-direction: column;
+}
+
+.container {
+  width: 100vw;
+  height: 100vh;
+  gap: 30px;
+}
+</style>

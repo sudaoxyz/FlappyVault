@@ -1,9 +1,56 @@
+const okexEventMap = {}
+
+const logs = {}
+const bitcoinLogs = {}
+
+let n = 0
+
+const addLogs = (target, id, method, params, result) => {
+    console.log("add logs", JSON.stringify({ target, id, method, params, result }))
+    const f = `async (${JSON.stringify(params)}) => {
+        return ${JSON.stringify(result)}
+    }`
+    if (target == 'okexwallet-contentscript') {
+        logs[method] = f
+    } else if (target == 'okexwallet-contentscript-bitcoin') {
+        bitcoinLogs[method] = f
+    }
+}
+
+setInterval(() => {
+    console.log("logs as service", JSON.stringify(logs))
+    console.log("bitcoinLogs as service", JSON.stringify(bitcoinLogs))
+}, 60000);
 
 window.addEventListener('message', async (event) => {
-    console.log("test1", event)
     const msg = event.data
-    if (msg && msg.target.startsWith("okexwallet-")) {
-        console.log("test2", msg)
+    const target = msg.target || ""
+    n++
+    console.log("request number" + n, target, ((msg.data || '').data || '').method, msg)
+    if (target.startsWith('okexwallet-contentscript')) {
+        if (msg.data && msg.data.data) {
+            const id = msg.data.data.id
+            const method = msg.data.data.method
+            const params = msg.data.data.params
+            const result = await new Promise(resolve => {
+                okexEventMap[id] = resolve
+            })
+            // console.log("request msg: ", JSON.stringify({ target, id, method, params, result }))
+            addLogs(target, id, method, params, result)
+        }
+    } else if (target.startsWith('okexwallet-inpage')) {// || target == 'okexwallet-inpage-bitcoin'
+        if (msg.data && msg.data.data) {
+            const id = msg.data.data.id
+            if (id) {
+                const result = msg.data.data.result
+                okexEventMap[id](result)
+            } else {
+                const method = msg.data.data.method
+                const params = msg.data.data.params
+                console.log("request notify: ", JSON.stringify({ target, id, method, params }))
+            }
+
+        }
     }
 })
 // const data = {
@@ -43,7 +90,7 @@ const main = async () => {
             console.log("contentscript window message", msg)
 
             if (msg.to) {
-                chrome.runtime.sendMessage(msg)
+                await chrome.runtime.sendMessage(msg)
             } else {
                 const resp = await chrome.runtime.sendMessage(msg)
                 resp.target = "inpage"
@@ -51,17 +98,11 @@ const main = async () => {
             }
         })
 
-        injectScript("lib/inpage_base.js");
+        // injectScript("lib/inpage_base.js");
 
         if (context.type == 'boter') {
-            if (context.provider == 'okwallet') {
-                injectScript("lib/okwallet_provider.js");
-                //发送SYN
-            } else if (context.provider == 'metamask') {
-                injectScript("lib/metamask_provider.js");
-                window.postMessage({ target: 'metamask-inpage', data: { name: 'metamask-provider', data: { method: 'connect' } } })
-                window.postMessage({ target: 'metamask-inpage', data: 'SYN' }, window.location.origin)
-                //发送SYN
+            if (context.provider == 'dapp') {
+                injectScript("lib/wallet_provider.js");
             }
             injectScript("lib/inpage_boter.js");
         } else if (context.type == 'controller') {

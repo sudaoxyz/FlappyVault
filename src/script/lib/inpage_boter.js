@@ -1,38 +1,34 @@
+import './inpage_base'
 console.log("boternet boter injected")
 
 window.addEventListener('message', async (event) => {
     try {
         const msg = event.data
-        // 所有对钱包的请求，不再从contentscript去代理，而是从boter页面中代理，以保持contentscript的通用性
-        if (msg.target == "metamask-contentscript") {
-            console.log("boter inpage metamask req", msg)
+        const target = msg.target || ""
+        if (target.startsWith('okexwallet-contentscript')) {
+            // 所有对钱包的请求，不再从contentscript去代理，而是从boter页面中代理，以保持contentscript的通用性
             if (msg.data == 'SYN' || msg.data == 'ACK') {
-                window.postMessage({ target: 'metamask-inpage', data: msg.data }, window.location.origin)
+                window.postMessage({ target: target.replace("contentscript", "inpage"), data: msg.data }, window.location.origin)
             } else {
                 // 这里封装wallet请求并转发到boternet
                 const tabId = await window.boternet.request(0, 0, "getTabId", {})
                 const boterInfo = JSON.parse(sessionStorage.getItem(String(tabId)))
-                console.log("request_wallet", boterInfo, msg)
                 const result = await window.boternet.request(0, boterInfo.controller, "request_wallet", msg)
                 window.postMessage(result, window.location.origin)
+                if (msg.data.data.method == 'wallet_wallets' || msg.data.data.method == 'eth_accounts') {
+                    window.postMessage({ message: { action: "connect" } }, window.location.origin)
+                }
             }
-            return
-        }
-
-        if (!msg || msg.name != "boternet-provider" || msg.target != 'inpage') {
-            return
-        }
-
-        if (msg.type == 'resp') {
-            console.log("boter inpage resp", msg)
-            if (msg.err) {
-                window.boternet.requestMap[msg.id].reject(msg)
+        } else if (msg && msg.name == "boternet-provider" && msg.target == 'inpage') {
+            if (msg.type == 'resp') {
+                if (msg.err) {
+                    window.boternet.requestMap[msg.id].reject(msg)
+                } else {
+                    window.boternet.requestMap[msg.id].resolve(msg.result)
+                }
             } else {
-                window.boternet.requestMap[msg.id].resolve(msg.result)
+                await window.boternet.execCommand(msg)
             }
-        } else {
-            console.log("boter inpage req", msg)
-            await window.boternet.execCommand(msg)
         }
     } catch (error) {
         console.log("boter inpage error", String(error), event.data)

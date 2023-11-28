@@ -1,4 +1,3 @@
-console.log("boternet injected")
 // const data = {
 //     id: 0,
 //     target:'',

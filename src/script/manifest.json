@@ -1,13 +1,13 @@
 {
 	"manifest_version": 3,
-	"name": "FlappyVault",
-	"description": "FlappyVault是一个以用户为中心的以太坊兼容钱包，旨在提升 DeFi 体验。具有批量导入私钥和自动交易确认等功能，我们为用户提供了一个简单便捷的加密货币之旅。",
-	"version": "0.1.1",
+	"name": "BoternetExt",
+	"description": "BoternetExt是一个自动化网页插件，提供了简单便捷的自动化网页操作。",
+	"version": "0.1.0",
 	"icons": {
 		"128": "icon128.png"
 	},
 	"action": {
-		"default_title": "连接你的Dapp"
+		"default_title": "开启你的boter"
 	},
 	"background": {
 		"service_worker": "background.js",
@@ -50,8 +50,7 @@
 				"lib/inpage_base.js",
 				"lib/inpage_boter.js",
 				"lib/inpage_controller.js",
-				"lib/okwallet_provider.js",
-				"lib/metamask_provider.js"
+				"lib/wallet_provider.js"
 			]
 		}
 	]
