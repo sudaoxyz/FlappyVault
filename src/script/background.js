@@ -1,36 +1,76 @@
+async function addTimerListener(port) {
+    const result = await chrome.storage.session.get(["connectedPorts"])
+    const data = result["connectedPorts"] || {}
+    if (!data[port.sender.tab.id]) {
+        data[port.sender.tab.id] = true
+        await chrome.storage.session.set({ connectedPorts: data })
+    }
+}
+async function clearTimerListener(port) {
+    const result = await chrome.storage.session.get(["connectedPorts"])
+    let data = result["connectedPorts"] || {}
+    delete data[port.sender.tab.id]
+    await chrome.storage.session.set({ connectedPorts: data })
+}
+
+chrome.runtime.onConnect.addListener((port) => {
+    console.log("onConnect:", port)
+    addTimerListener(port)
+    port.onDisconnect.addListener((port) => {
+        console.log("onDisconnect: ", port)
+        clearTimerListener(port)
+    })
+})
+
+chrome.alarms.onAlarm.addListener((alarms) => {
+    console.log("onAlarm", alarms)
+    for (let i = 0; i < 30; i++) {
+        setTimeout(async () => {
+            const result = await chrome.storage.session.get(["connectedPorts"])
+            const data = result["connectedPorts"] || {}
+            Object.keys(data).forEach(tabId => {
+                chrome.tabs.sendMessage(Number(tabId), {
+                    target: 'inpage',
+                    type: "req",
+                    taskId: 0,
+                    name: "boternet-provider",
+                    method: "interval"
+                })
+            })
+        }, i * 1000)
+    }
+})
+
+chrome.alarms.create("timer", { delayInMinutes: 0.5, periodInMinutes: 0.5 })
+
 chrome.action.setPopup({ popup: "src/ui/popup/index.html" })
+
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     if (msg && msg.to) {
         msg.from = sender.tab.id
         chrome.tabs.sendMessage(Number(msg.to), msg)
-        return false
+        sendResponse()
     } else {
-        msg.type = 'resp'
         const method = service[msg.method]
         if (!method) {
-            msg.err = new Error("unsupported method")
-            sendResponse(msg)
+            sendResponse({ err: "unsupported method" })
         } else {
             method(msg, sender).then((resp) => {
-                msg.result = resp
-                sendResponse(msg)
+                sendResponse({ data: resp })
             }).catch(err => {
-                msg.err = err
-                sendResponse(msg)
+                sendResponse({ err: err })
             })
         }
-
-        return true
     }
+    return true
 })
 
 const service = {
     getTabId: async (msg, sender) => {
         return sender.tab.id
     },
-    open_page: async (msg, sender) => {
+    new_page: async (msg, sender) => {
         const params = msg.params
-        console.log('open_page', params)
 
         const tab = await chrome.tabs.create({})
         const data = {}
@@ -43,11 +83,19 @@ const service = {
         }
 
         await chrome.storage.local.set(data)
-        await chrome.tabs.update(tab.id, { url: params.url })
 
         return { boterId: tab.id, boternet: sender.tab.id }
     },
-
+    update_page: async (msg, sender) => {
+        const params = msg.params
+        await chrome.tabs.update(params.tabId, { url: params.url })
+    },
+    reload_page: async (sender) => {
+        await chrome.tabs.reload(sender.tab.id, {})
+    },
+    remove_page: async (sender) => {
+        await chrome.tabs.remove(sender.tab.id)
+    },
     attach: async (msg, sender) => {
         await chrome.debugger.attach({ tabId: sender.tab.id }, '1.3')
     },
@@ -82,5 +130,49 @@ const service = {
         const params = msg.params
         const resp = await fetch(params.url, params.options)
         return resp.json()
+    },
+    setInterval: async (msg, sender) => {
+        const params = msg.params
+        _setInterval(sender.tab.id, msg.taskId, params.id, params.ms)
+    },
+    clearInterval: async (msg, sender) => {
+        _clearInterval(sender.tab.id, msg.taskId, params.id)
     }
+}
+
+class BtntTimer {
+    constructor(tabId, taskId, id, ms) {
+        this.timerId = setInterval(() => {
+            chrome.tabs.sendMessage(Number(tabId), {
+                target: 'inpage',
+                type: "req",
+                taskId: taskId,
+                name: "boternet-provider",
+                method: "interval",
+                params: { id, tabId, taskId },
+            })
+        }, ms)
+    }
+    clear = () => {
+        clearInterval(this.timerId)
+    }
+}
+
+let timers = {}
+function _setInterval(tabId, taskId, id, ms) {
+    // const id = `${tabId}-${taskId}-${id}`
+    // if (timers[id]) {
+    //     return
+    // }
+    // timers[id] = new BtntTimer(tabId, taskId, id, ms)
+}
+
+function _clearInterval(tabId, taskId, id) {
+    // const id = `${tabId}-${taskId}-${id}`
+    // const timer = timers[id]
+    // if (!timer) {
+    //     return
+    // }
+    // timer.clear()
+    // delete timers[id]
 }

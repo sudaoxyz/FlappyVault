@@ -5,7 +5,7 @@ window.addEventListener('message', async (event) => {
     try {
         const msg = event.data
         const target = msg.target || ""
-        if (target.startsWith('okexwallet-contentscript')) {
+        if (target.startsWith('btntwallet-contentscript')) {
             // 所有对钱包的请求，不再从contentscript去代理，而是从boter页面中代理，以保持contentscript的通用性
             if (msg.data == 'SYN' || msg.data == 'ACK') {
                 window.postMessage({ target: target.replace("contentscript", "inpage"), data: msg.data }, window.location.origin)
@@ -19,30 +19,25 @@ window.addEventListener('message', async (event) => {
                     window.postMessage({ message: { action: "connect" } }, window.location.origin)
                 }
             }
-        } else if (msg && msg.name == "boternet-provider" && msg.target == 'inpage') {
-            if (msg.type == 'resp') {
-                if (msg.err) {
-                    window.boternet.requestMap[msg.id].reject(msg)
-                } else {
-                    window.boternet.requestMap[msg.id].resolve(msg.result)
-                }
-            } else {
-                await window.boternet.execCommand(msg)
-            }
         }
     } catch (error) {
-        console.log("boter inpage error", String(error), event.data)
+        console.log("boter inpage error", JSON.stringify(error), event.data)
     }
 
 })
 
 window.boternet.service = {
-    getText: async (params) => {
-        const element = await waitForSelector(params.selector)
-        return element.innerText
+    reload: async () => {
+        await window.boternet.request(0, 0, 'reload_page', {})
     },
     attach: async (params) => {
         await window.boternet.request(0, 0, 'attach', {})
+    },
+    detach: async (params) => {
+        await window.boternet.request(0, 0, 'detach', {})
+    },
+    close: async () => {
+        await window.boternet.request(0, 0, 'remove_page', {})
     },
     focus: async (params) => {
         const position = await getPositionAndScroll(params.selector)
@@ -59,12 +54,16 @@ window.boternet.service = {
         const position = await getCorner(params)
         await window.boternet.request(0, 0, 'click', position)
     },
+    getText: async (params) => {
+        const element = await waitForSelector(params.selector)
+        return element.innerText
+    },
     fetchJson: async (params) => {
         const resp = await fetch(params.url, params.options)
         return resp.json()
     },
     waitForSelector: async (params) => {
-        return await waitForSelector(params.selector, params.opts)
+        return await waitForSelector(params.selector, params.options)
     },
     waitForScroll: async (params) => {
         return await waitForScroll(params.selector, params.opts)
