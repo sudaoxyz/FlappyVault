@@ -32,9 +32,9 @@ chrome.alarms.onAlarm.addListener((alarms) => {
                 chrome.tabs.sendMessage(Number(tabId), {
                     target: 'inpage',
                     type: "req",
-                    taskId: 0,
+                    jobId: 0,
                     name: "boternet-provider",
-                    method: "interval"
+                    method: "request_interval"
                 })
             })
         }, i * 1000)
@@ -78,7 +78,7 @@ const service = {
             type: "boter",
             boter: tab.id,
             controller: sender.tab.id,
-            taskId: params.taskId,
+            jobId: params.jobId,
             provider: params.provider
         }
 
@@ -130,49 +130,5 @@ const service = {
         const params = msg.params
         const resp = await fetch(params.url, params.options)
         return resp.json()
-    },
-    setInterval: async (msg, sender) => {
-        const params = msg.params
-        _setInterval(sender.tab.id, msg.taskId, params.id, params.ms)
-    },
-    clearInterval: async (msg, sender) => {
-        _clearInterval(sender.tab.id, msg.taskId, params.id)
     }
-}
-
-class BtntTimer {
-    constructor(tabId, taskId, id, ms) {
-        this.timerId = setInterval(() => {
-            chrome.tabs.sendMessage(Number(tabId), {
-                target: 'inpage',
-                type: "req",
-                taskId: taskId,
-                name: "boternet-provider",
-                method: "interval",
-                params: { id, tabId, taskId },
-            })
-        }, ms)
-    }
-    clear = () => {
-        clearInterval(this.timerId)
-    }
-}
-
-let timers = {}
-function _setInterval(tabId, taskId, id, ms) {
-    // const id = `${tabId}-${taskId}-${id}`
-    // if (timers[id]) {
-    //     return
-    // }
-    // timers[id] = new BtntTimer(tabId, taskId, id, ms)
-}
-
-function _clearInterval(tabId, taskId, id) {
-    // const id = `${tabId}-${taskId}-${id}`
-    // const timer = timers[id]
-    // if (!timer) {
-    //     return
-    // }
-    // timer.clear()
-    // delete timers[id]
 }

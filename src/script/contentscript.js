@@ -19,6 +19,7 @@ const main = async () => {
             }
 
             if (msg.to) {
+                msg.jobId = context.jobId
                 await chrome.runtime.sendMessage(msg)
             } else {
                 msg.target = "inpage"

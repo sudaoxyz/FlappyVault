@@ -3,12 +3,12 @@ class Boternet {
         this.service = {}
         this.requestMap = {}
     }
-    newMessageId = () => {
+    randomId = () => {
         return Math.floor((1 + Math.random()) * 10000000000000)
     }
 
-    _request = async (taskId, to, method, params, withResp) => {
-        const id = this.newMessageId()
+    _request = async (jobId, to, method, params, withResp) => {
+        const id = this.randomId()
         const resp = await new Promise((resolve, reject) => {
             this.requestMap[id] = { id, resolve, reject }
             window.postMessage({
@@ -16,7 +16,7 @@ class Boternet {
                 target: "contentscript",
                 name: "boternet-provider",
                 type: 'req',
-                taskId: taskId,
+                jobId: jobId,
                 to: to,
                 method: method,
                 params: params,
@@ -24,16 +24,24 @@ class Boternet {
             }, window.location.origin)
         })
         delete this.requestMap[id]
+        try {
+            if (params.data.data.method == "wallet_requestWallets") {
+                console.log("!11111111", id, resp)
+            }
+        } catch (error) {
+
+        }
+
         return resp
     }
 
-    request = async (taskId, to, method, params) => {
-        return await this._request(taskId, to, method, params, true)
+    request = async (jobId, to, method, params) => {
+        return await this._request(jobId, to, method, params, true)
     }
 
     execCommand = async (msg) => {
         try {
-            const resp = await this.service[msg.method](msg.params)
+            const resp = await this.service[msg.method](msg.params, msg)
             if (msg.return) {
                 msg.type = 'resp'
                 msg.target = 'contentscript'
@@ -42,11 +50,8 @@ class Boternet {
                 window.postMessage(msg, window.location.origin)
             }
         } catch (error) {
-            console.log("inpage base error", JSON.stringify(error), msg)
+            console.log("inpage base error", error, JSON.stringify(error), msg)
         }
-    }
-
-    launch = async (context = {}) => {
     }
 }
 
@@ -67,6 +72,6 @@ window.addEventListener('message', async (event) => {
             }
         }
     } catch (error) {
-        console.log("base listener error: ", JSON.stringify(error), event.data)
+        console.log("base listener error: ", error.error, event.data)
     }
 })
