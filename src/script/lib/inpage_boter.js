@@ -1,6 +1,7 @@
 import './inpage_base'
 console.log("boternet boter injected")
 
+// 接收所有walletprovider的request请求，会封装后转发给boternet，并把处理结果通知walletprovider
 window.addEventListener('message', async (event) => {
     try {
         const msg = event.data
@@ -13,8 +14,10 @@ window.addEventListener('message', async (event) => {
                 // 这里封装wallet请求并转发到boternet
                 const tabId = await window.boternet.request(0, 0, "getTabId", {})
                 const boterInfo = JSON.parse(sessionStorage.getItem(String(tabId)))
+                // 这里获取钱包调用结果
                 const result = await window.boternet.request(0, boterInfo.controller, "request_wallet", msg)
                 window.postMessage(result, window.location.origin)
+                // 如果页面发起连接请求，则响应connect事件
                 if (msg.data.data.method == 'wallet_wallets' || msg.data.data.method == 'eth_accounts') {
                     window.postMessage({ message: { action: "connect" } }, window.location.origin)
                 }
@@ -27,6 +30,9 @@ window.addEventListener('message', async (event) => {
 })
 
 window.boternet.service = {
+    isReady: async () => {
+        return true
+    },
     reload: async () => {
         await window.boternet.request(0, 0, 'reload_page', {})
     },
@@ -206,3 +212,28 @@ async function waitForScroll(selector, opts = { timeout: 200 }) {
         check()
     })
 }
+
+async function waitForDocumentReady(opts = { timeout: 30000 }) {
+    await new Promise((resolve, reject) => {
+        let timer = setTimeout(() => {
+            reject("Timeout exceeded in wait until ")
+        }, opts.timeout)
+        const check = () => {
+            if (window.document.readyState == 'complete') {
+                clearTimeout(timer)
+                resolve()
+            } else {
+                requestAnimationFrame(check)
+            }
+        }
+        check()
+    })
+}
+
+// boter加载完成并通知boternet
+waitForDocumentReady().then(async () => {
+    const tabId = await window.boternet.request(0, 0, "getTabId", {})
+    const boterInfo = JSON.parse(sessionStorage.getItem(String(tabId)))
+    const result = await window.boternet.request(0, boterInfo.controller, "boter_ready", { title: window.document.title })
+    console.log('boter connected boternet', result)
+})
