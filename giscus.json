@@ -1,3 +1,4 @@
 {
-  "origins": ["http://www.boternet.xyz"]
+  "origins": ["http://www.boternet.xyz"],
+  "defaultCommentOrder": "newest"
 }
