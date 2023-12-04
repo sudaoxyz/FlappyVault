@@ -3,7 +3,13 @@
 
 <template>
   <div class="container box center column">
-    欢迎加入boternet
+    <img src="../../script/icon128.png" alt="" style="width: 50%;">
+    <div style="font-weight: bolder; font-size: 18px;">
+      Welcome to Boternet.
+    </div>
+    <div style="font-weight: bolder; font-size: 18px;">
+       More features coming soon...
+    </div>
   </div>
 </template>
 
@@ -24,7 +30,7 @@
 
 .container {
   width: 100vw;
-  height: 100vh;
-  gap: 30px;
+  height: 90vh;
+  gap: 8px;
 }
 </style>

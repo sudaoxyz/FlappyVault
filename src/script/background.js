@@ -114,6 +114,11 @@ const service = {
         const mouseUp = { type: 'mouseReleased', x: params.x, y: params.y, button: 'left' }
         await chrome.debugger.sendCommand({ tabId: sender.tab.id }, "Input.dispatchMouseEvent", mouseUp)
     },
+    hover: async (msg, sender) => {
+        const params = msg.params
+        const mouseMoved = { type: 'mouseMoved', x: params.x, y: params.y }
+        await chrome.debugger.sendCommand({ tabId: sender.tab.id }, "Input.dispatchMouseEvent", mouseMoved)
+    },
     input: async (msg, sender) => {
         const params = msg.params
         for (const c of params.text) {

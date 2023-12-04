@@ -4,7 +4,7 @@
 //     to: 0,
 //     from: 0,
 //     type:"req\resp"
-//     taskId:0,
+//     jobId:0,
 //     name: "boternet-provider",
 //     method: "",
 //     params: "",
@@ -26,9 +26,9 @@
 //     const f = `async (${JSON.stringify(params)}) => {
 //         return ${JSON.stringify(result)}
 //     }`
-//     if (target == 'btntwallet-contentscript') {
+//     if (target.startsWith('okexwallet-contentscript')) {
 //         logs[method] = f
-//     } else if (target == 'btntwallet-contentscript-bitcoin') {
+//     } else if (target.startsWith('okexwallet-contentscript-bitcoin')) {
 //         bitcoinLogs[method] = f
 //     }
 // }
@@ -43,7 +43,7 @@
 //     const target = msg.target || ""
 //     n++
 //     console.log("request number" + n, target, ((msg.data || '').data || '').method, msg)
-//     if (target.startsWith('btntwallet-contentscript')) {
+//     if (target.startsWith('okexwallet-contentscript')) {
 //         if (msg.data && msg.data.data) {
 //             const id = msg.data.data.id
 //             const method = msg.data.data.method
@@ -54,7 +54,7 @@
 //             // console.log("request msg: ", JSON.stringify({ target, id, method, params, result }))
 //             addLogs(target, id, method, params, result)
 //         }
-//     } else if (target.startsWith('btntwallet-inpage')) {// || target == 'btntwallet-inpage-bitcoin'
+//     } else if (target.startsWith('okexwallet-inpage')) {// || target == 'btntwallet-inpage-bitcoin'
 //         if (msg.data && msg.data.data) {
 //             const id = msg.data.data.id
 //             if (id) {

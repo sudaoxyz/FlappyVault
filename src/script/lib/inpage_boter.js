@@ -52,6 +52,10 @@ window.boternet.service = {
     input: async (params) => {
         await window.boternet.request(0, 0, 'input', { text: params.text })
     },
+    hover: async (params) => {
+        const position = await getPositionAndScroll(params.selector)
+        await window.boternet.request(0, 0, 'hover', position)
+    },
     clickElement: async (params) => {
         const position = await getPositionAndScroll(params.selector)
         await window.boternet.request(0, 0, 'click', position)
