@@ -37,10 +37,14 @@ window.boternet.service = {
         await window.boternet.request(0, 0, 'reload_page', {})
     },
     attach: async (params) => {
-        await window.boternet.request(0, 0, 'attach', {})
+        try {
+            await window.boternet.request(0, 0, 'attach', {})
+        } catch (error) { }
     },
     detach: async (params) => {
-        await window.boternet.request(0, 0, 'detach', {})
+        try {
+            await window.boternet.request(0, 0, 'detach', {})
+        } catch (error) { }
     },
     close: async () => {
         await window.boternet.request(0, 0, 'remove_page', {})

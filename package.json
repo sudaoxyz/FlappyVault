@@ -30,16 +30,16 @@
   },
   "keywords": [
     "web3",
-    "extension",
-    "wallet",
+    "dapp",
+    "script",
+    "robot",
     "auto",
-    "ethereum",
-    "dapp"
+    "remote"
   ],
   "author": "sudaoxyz",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/sudaoxyz/FlappyVault/issues"
   },
-  "homepage": "https://github.com/sudaoxyz/FlappyVault#readme"
+  "homepage": "http://www.boternet.xyz"
 }

@@ -1,13 +1,13 @@
 {
 	"manifest_version": 3,
-	"name": "BoternetExt",
-	"description": "BoternetExt是一个自动化网页插件，提供了简单便捷的自动化网页操作。",
+	"name": "Boternet",
+	"description": "Boternet is a web automation tool that supports web3. Used in conjunction with tool websites, it can improve operational efficiency.",
 	"version": "0.1.0",
 	"icons": {
 		"128": "icon128.png"
 	},
 	"action": {
-		"default_title": "开启你的boter"
+		"default_title": "Boternet"
 	},
 	"background": {
 		"service_worker": "background.js",

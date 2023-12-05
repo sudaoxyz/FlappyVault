@@ -58,6 +58,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
             method(msg, sender).then((resp) => {
                 sendResponse({ data: resp })
             }).catch(err => {
+                console.log(msg, err)
                 sendResponse({ err: err })
             })
         }
@@ -86,14 +87,18 @@ const service = {
 
         return { boterId: tab.id, boternet: sender.tab.id }
     },
+    home_page: async (msg, sender) => {
+        const tab = await chrome.tabs.create({ url: msg.params.url })
+        return { boternet: tab.id }
+    },
     update_page: async (msg, sender) => {
         const params = msg.params
         await chrome.tabs.update(params.tabId, { url: params.url })
     },
-    reload_page: async (sender) => {
+    reload_page: async (msg, sender) => {
         await chrome.tabs.reload(sender.tab.id, {})
     },
-    remove_page: async (sender) => {
+    remove_page: async (msg, sender) => {
         await chrome.tabs.remove(sender.tab.id)
     },
     attach: async (msg, sender) => {

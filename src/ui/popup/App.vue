@@ -1,14 +1,17 @@
 <script setup>
+async function openBoternet() {
+  await chrome.runtime.sendMessage({ to: 0, method: "home_page", params: { url: 'http://www.boternet.xyz' } })
+}
 </script>
 
 <template>
   <div class="container box center column">
     <img src="../../script/icon128.png" alt="" style="width: 50%;">
     <div style="font-weight: bolder; font-size: 18px;">
-      Welcome to Boternet.
+      Welcome to <span @click="openBoternet"><a href="">Boternet</a></span>
     </div>
     <div style="font-weight: bolder; font-size: 18px;">
-       More features coming soon...
+      More features coming soon.
     </div>
   </div>
 </template>
