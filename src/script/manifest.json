@@ -40,18 +40,5 @@
 		"storage",
 		"unlimitedStorage",
 		"debugger"
-	],
-	"web_accessible_resources": [
-		{
-			"use_dynamic_url": true,
-			"matches": [
-				"<all_urls>"
-			],
-			"resources": [
-				"lib/inpage_base.js",
-				"lib/inpage_boter.js",
-				"lib/inpage_controller.js"
-			]
-		}
 	]
 }

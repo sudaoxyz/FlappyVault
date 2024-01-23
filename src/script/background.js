@@ -73,17 +73,7 @@ const service = {
     new_page: async (msg, sender) => {
         const params = msg.params
 
-        const tab = await chrome.tabs.create({ url: params.url })
-        const data = {}
-        data[tab.id] = {
-            type: "boter",
-            boter: tab.id,
-            controller: sender.tab.id,
-            jobId: params.jobId
-        }
-
-        await chrome.storage.local.set(data)
-
+        const tab = await chrome.tabs.create({ url: params.url || chrome.runtime.getURL("src/ui/dashboard/index.html") })
         return { boterId: tab.id, boternet: sender.tab.id }
     },
     home_page: async (msg, sender) => {
@@ -102,7 +92,7 @@ const service = {
     },
     attach: async (msg, sender) => {
         try {
-            await chrome.debugger.attach({ tabId: sender.tab.id }, '1.3')
+            await chrome.debugger.attach({ tabId: msg.params.tabId || sender.tab.id }, '1.3')
         } catch (error) {
             console.log(error)
         }

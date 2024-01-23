@@ -1,97 +1,38 @@
-const main = async () => {
-    if (shouldInjectProvider()) {
-        const context = await getContext()
-        if (context.type != 'boter' && context.type != 'controller') {
+
+if (shouldInjectProvider()) {
+
+    chrome.runtime.onMessage.addListener((msg, from, sendResponse) => {
+        msg.target = "inpage"
+        window.postMessage(msg, window.location.origin)
+        return false
+    })
+
+    window.addEventListener('message', async (event) => {
+        const msg = event.data
+        if (!msg || msg.name != "boternet-provider" || msg.target != 'contentscript') {
             return
         }
 
-        chrome.runtime.onMessage.addListener((msg, from, sendResponse) => {
+        if (msg.to) {
+            await chrome.runtime.sendMessage(msg)
+        } else {
             msg.target = "inpage"
-            window.postMessage(msg, window.location.origin)
-            return false
-        })
-
-        window.addEventListener('message', async (event) => {
-
-            const msg = event.data
-            if (!msg || msg.name != "boternet-provider" || msg.target != 'contentscript') {
-                return
-            }
-
-            if (msg.to) {
-                msg.jobId = context.jobId
-                await chrome.runtime.sendMessage(msg)
+            msg.type = "resp"
+            if (msg.method == 'connect') {
+                const port = await chrome.runtime.connect()
+                msg.result = port
             } else {
-                msg.target = "inpage"
-                msg.type = "resp"
-                if (msg.method == 'connect') {
-                    const port = await chrome.runtime.connect()
-                    msg.result = port
+                const resp = await chrome.runtime.sendMessage(msg)
+                if (resp.err) {
+                    msg.err = resp.err
                 } else {
-                    const resp = await chrome.runtime.sendMessage(msg)
-                    if (resp.err) {
-                        msg.err = resp.err
-                    } else {
-                        msg.result = resp.data
-                    }
+                    msg.result = resp.data
                 }
-                window.postMessage(JSON.parse(JSON.stringify(msg)), window.location.origin)
             }
-        })
-
-        if (context.type == 'boter') {
-            await injectScript("lib/inpage_boter.js");
-        } else if (context.type == 'controller') {
-            await injectScript("lib/inpage_controller.js");
+            window.postMessage(JSON.parse(JSON.stringify(msg)), window.location.origin)
         }
-    }
-}
-
-main().catch(err => { console.log(err) })
-
-async function getContext() {
-    if (window.location.hostname.endsWith("boternet.xyz") || window.location.hostname.endsWith("localhost")) {
-        return { type: 'controller' }
-    }
-
-    const resp = await chrome.runtime.sendMessage({ method: 'getTabId' })
-    const tabId = resp.data
-    const sessionData = JSON.parse(sessionStorage.getItem(String(tabId)))
-    if (sessionData) {
-        sessionData.type == 'boter'
-        return sessionData
-    }
-
-    const result = await chrome.storage.local.get([String(tabId)])
-    const storeData = result[tabId]
-    if (storeData) {
-        storeData.type == 'boter'
-        sessionStorage.setItem(String(tabId), JSON.stringify(storeData))
-        await chrome.storage.local.remove(String(tabId))
-        return storeData
-    }
-
-    return {}
-}
-
-async function injectScript(path) {
-    await new Promise(resolve => {
-        const src = chrome.runtime.getURL(path)
-        const container = document.head || document.documentElement;
-        const scriptTag = document.createElement('script');
-        scriptTag.async = false
-        scriptTag.setAttribute('async', false);
-        scriptTag.type = 'module';
-        scriptTag.src = src;
-        scriptTag.onload = () => {
-            resolve()
-            container.removeChild(scriptTag)
-        }
-        container.insertBefore(scriptTag, container.children[0]);
     })
-
 }
-
 
 function iframeCheck() {
     const isInIframe = self != top;
