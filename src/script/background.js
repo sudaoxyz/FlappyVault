@@ -73,14 +73,13 @@ const service = {
     new_page: async (msg, sender) => {
         const params = msg.params
 
-        const tab = await chrome.tabs.create({})
+        const tab = await chrome.tabs.create({ url: params.url })
         const data = {}
         data[tab.id] = {
             type: "boter",
             boter: tab.id,
             controller: sender.tab.id,
-            jobId: params.jobId,
-            provider: params.provider
+            jobId: params.jobId
         }
 
         await chrome.storage.local.set(data)
@@ -102,10 +101,23 @@ const service = {
         await chrome.tabs.remove(sender.tab.id)
     },
     attach: async (msg, sender) => {
-        await chrome.debugger.attach({ tabId: sender.tab.id }, '1.3')
+        try {
+            await chrome.debugger.attach({ tabId: sender.tab.id }, '1.3')
+        } catch (error) {
+            console.log(error)
+        }
+
     },
     detach: async (msg, sender) => {
-        await chrome.debugger.detach({ tabId: sender.tab.id })
+        try {
+            await chrome.debugger.detach({ tabId: sender.tab.id })
+        } catch (error) {
+            console.log(error)
+        }
+    },
+    sendCommand: async (msg, sender) => {
+        const params = msg.params
+        await chrome.debugger.sendCommand({ tabId: params.tabId }, params.command, params.options)
     },
     focus: async (msg, sender) => {
         const params = msg.params

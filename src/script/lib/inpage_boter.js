@@ -1,5 +1,5 @@
 import './inpage_base'
-console.log("boternet boter injected")
+console.log("boternet boter2 injected")
 
 // 接收所有walletprovider的request请求，会封装后转发给boternet，并把处理结果通知walletprovider
 window.addEventListener('message', async (event) => {
@@ -68,9 +68,13 @@ window.boternet.service = {
         const position = await getCorner(params)
         await window.boternet.request(0, 0, 'click', position)
     },
-    getText: async (params) => {
+    innerText: async (params) => {
         const element = await waitForSelector(params.selector)
-        return element.innerText
+        return element.textContent
+    },
+    innerHTML: async (params) => {
+        const element = await waitForSelector(params.selector)
+        return element.innerHTML
     },
     fetchJson: async (params) => {
         const resp = await fetch(params.url, params.options)
@@ -171,7 +175,9 @@ function _getScrollDelta(element) {
 
 function waitForSelector(selector, opts = { timeout: 10000 }) {
     return new Promise((resolve, reject) => {
-        const element = document.querySelector(selector)
+        const element = selector.startsWith('//') ?
+            document.evaluate(selector, document, null, XPathResult.ANY_TYPE, null).iterateNext() :
+            document.querySelector(selector)
         if (element) {
             resolve(element)
             return

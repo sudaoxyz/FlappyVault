@@ -41,9 +41,6 @@ const main = async () => {
 
         if (context.type == 'boter') {
             await injectScript("lib/inpage_boter.js");
-            if (context.provider == 'dapp') {
-                await injectScript("lib/wallet_provider.js");
-            }
         } else if (context.type == 'controller') {
             await injectScript("lib/inpage_controller.js");
         }
