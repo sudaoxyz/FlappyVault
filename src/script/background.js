@@ -142,5 +142,10 @@ const service = {
         const params = msg.params
         const resp = await fetch(params.url, params.options)
         return resp.json()
+    },
+    fetchText: async (msg, sender) => {
+        const params = msg.params
+        const resp = await fetch(params.url, params.options)
+        return resp.text()
     }
 }

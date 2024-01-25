@@ -1,6 +1,5 @@
 
 if (shouldInjectProvider()) {
-
     chrome.runtime.onMessage.addListener((msg, from, sendResponse) => {
         msg.target = "inpage"
         window.postMessage(msg, window.location.origin)
@@ -32,6 +31,28 @@ if (shouldInjectProvider()) {
             window.postMessage(JSON.parse(JSON.stringify(msg)), window.location.origin)
         }
     })
+
+    if (window.location.hostname.endsWith("boternet.xyz") || window.location.hostname.endsWith("localhost")) {
+        injectScript("inpage/boternet.js");
+    }
+}
+
+async function injectScript(path) {
+    await new Promise(resolve => {
+        const src = chrome.runtime.getURL(path)
+        const container = document.head || document.documentElement;
+        const scriptTag = document.createElement('script');
+        scriptTag.async = false
+        scriptTag.setAttribute('async', false);
+        scriptTag.type = 'module';
+        scriptTag.src = src;
+        scriptTag.onload = () => {
+            resolve()
+            container.removeChild(scriptTag)
+        }
+        container.insertBefore(scriptTag, container.children[0]);
+    })
+
 }
 
 function iframeCheck() {

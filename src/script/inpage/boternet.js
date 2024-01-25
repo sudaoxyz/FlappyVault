@@ -1,0 +1,1 @@
+window.hasBoternet = true
