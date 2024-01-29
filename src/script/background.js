@@ -1,18 +1,3 @@
-async function addTimerListener(port) {
-    const result = await chrome.storage.session.get(["connectedPorts"])
-    const data = result["connectedPorts"] || {}
-    if (!data[port.sender.tab.id]) {
-        data[port.sender.tab.id] = true
-        await chrome.storage.session.set({ connectedPorts: data })
-    }
-}
-async function clearTimerListener(port) {
-    const result = await chrome.storage.session.get(["connectedPorts"])
-    let data = result["connectedPorts"] || {}
-    delete data[port.sender.tab.id]
-    await chrome.storage.session.set({ connectedPorts: data })
-}
-
 chrome.runtime.onConnect.addListener((port) => {
     console.log("onConnect:", port)
     addTimerListener(port)
@@ -23,20 +8,23 @@ chrome.runtime.onConnect.addListener((port) => {
 })
 
 chrome.alarms.onAlarm.addListener((alarms) => {
-    console.log("onAlarm", alarms)
     for (let i = 0; i < 30; i++) {
         setTimeout(async () => {
             const result = await chrome.storage.session.get(["connectedPorts"])
             const data = result["connectedPorts"] || {}
-            Object.keys(data).forEach(tabId => {
-                chrome.tabs.sendMessage(Number(tabId), {
-                    target: 'inpage',
-                    type: "req",
-                    jobId: 0,
-                    name: "boternet-provider",
-                    method: "request_interval"
+            try {
+                Object.keys(data).forEach(tabId => {
+                    chrome.tabs.sendMessage(Number(tabId), {
+                        target: 'inpage',
+                        type: "req",
+                        jobId: 0,
+                        name: "boternet-provider",
+                        method: "request_interval"
+                    })
                 })
-            })
+            } catch (error) {
+                console.log(error)
+            }
         }, i * 1000)
     }
 })
@@ -148,4 +136,19 @@ const service = {
         const resp = await fetch(params.url, params.options)
         return resp.text()
     }
+}
+
+async function addTimerListener(port) {
+    const result = await chrome.storage.session.get(["connectedPorts"])
+    const data = result["connectedPorts"] || {}
+    if (!data[port.sender.tab.id]) {
+        data[port.sender.tab.id] = true
+        await chrome.storage.session.set({ connectedPorts: data })
+    }
+}
+async function clearTimerListener(port) {
+    const result = await chrome.storage.session.get(["connectedPorts"])
+    let data = result["connectedPorts"] || {}
+    delete data[port.sender.tab.id]
+    await chrome.storage.session.set({ connectedPorts: data })
 }
