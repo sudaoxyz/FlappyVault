@@ -18,7 +18,7 @@ chrome.alarms.onAlarm.addListener((alarms) => {
                         target: 'inpage',
                         type: "req",
                         jobId: 0,
-                        name: "boternet-provider",
+                        name: "evalsocial-provider",
                         method: "request_interval"
                     })
                 })
@@ -62,11 +62,11 @@ const service = {
         const params = msg.params
 
         const tab = await chrome.tabs.create({ url: params.url || chrome.runtime.getURL("src/ui/dashboard/index.html") })
-        return { boterId: tab.id, boternet: sender.tab.id }
+        return { evalId: tab.id, evalSocial: sender.tab.id }
     },
     home_page: async (msg, sender) => {
         const tab = await chrome.tabs.create({ url: msg.params.url })
-        return { boternet: tab.id }
+        return { evalSocial: tab.id }
     },
     update_page: async (msg, sender) => {
         const params = msg.params

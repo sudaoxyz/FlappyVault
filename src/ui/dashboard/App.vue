@@ -3,7 +3,7 @@
 
 <template>
   <div class="container box center column">
-    欢迎加入boternet
+    欢迎加入eval.social
   </div>
 </template>
 

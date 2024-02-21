@@ -1,6 +1,6 @@
 {
-  "name": "boternetext",
-  "description": "BoternetExt is a web3 automation helper.",
+  "name": "evalsocial",
+  "description": "EvalSocial is a helper for eval.social.",
   "version": "0.1.0",
   "type": "module",
   "scripts": {
@@ -41,5 +41,5 @@
   "bugs": {
     "url": "https://github.com/sudaoxyz/FlappyVault/issues"
   },
-  "homepage": "http://www.boternet.xyz"
+  "homepage": "http://eval.social"
 }

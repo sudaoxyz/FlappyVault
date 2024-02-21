@@ -8,7 +8,7 @@ if (shouldInjectProvider()) {
 
     window.addEventListener('message', async (event) => {
         const msg = event.data
-        if (!msg || msg.name != "boternet-provider" || msg.target != 'contentscript') {
+        if (!msg || msg.name != "evalsocial-provider" || msg.target != 'contentscript') {
             return
         }
 
@@ -32,8 +32,8 @@ if (shouldInjectProvider()) {
         }
     })
 
-    if (window.location.hostname.endsWith("boternet.xyz") || window.location.hostname.endsWith("localhost")) {
-        injectScript("inpage/boternet.js");
+    if (window.location.hostname.endsWith("eval.social") || window.location.hostname.endsWith("localhost")) {
+        injectScript("inpage/evalsocial.js");
     }
 }
 

@@ -1,13 +1,13 @@
 {
 	"manifest_version": 3,
-	"name": "Boternet",
-	"description": "Boternet is a web automation tool that supports web3. Used in conjunction with tool websites, it can improve operational efficiency.",
+	"name": "EvalSocial",
+	"description": "EvalSocial is a web automation helper for eval.social",
 	"version": "0.1.0",
 	"icons": {
 		"128": "icon128.png"
 	},
 	"action": {
-		"default_title": "Boternet"
+		"default_title": "EvalSocial"
 	},
 	"background": {
 		"service_worker": "background.js",
@@ -48,7 +48,7 @@
 				"<all_urls>"
 			],
 			"resources": [
-				"inpage/boternet.js"
+				"inpage/evalsocial.js"
 			]
 		}
 	]

@@ -1,6 +1,6 @@
 <script setup>
-async function openBoternet() {
-  await chrome.runtime.sendMessage({ to: 0, method: "home_page", params: { url: 'http://www.boternet.xyz' } })
+async function openEvalSocial() {
+  await chrome.runtime.sendMessage({ to: 0, method: "home_page", params: { url: 'http://eval.social' } })
 }
 </script>
 
@@ -8,7 +8,7 @@ async function openBoternet() {
   <div class="container box center column">
     <img src="../../script/icon128.png" alt="" style="width: 50%;">
     <div style="font-weight: bolder; font-size: 18px;">
-      Welcome to <span @click="openBoternet"><a href="">Boternet</a></span>
+      Welcome to <span @click="openEvalSocial"><a href="">EvalSocial</a></span>
     </div>
     <div style="font-weight: bolder; font-size: 18px;">
       More features coming soon.
