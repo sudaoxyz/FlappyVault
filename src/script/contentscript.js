@@ -1,3 +1,4 @@
+const baseUrl = 'eval.social'
 
 if (shouldInjectProvider()) {
     chrome.runtime.onMessage.addListener((msg, from, sendResponse) => {
@@ -32,7 +33,7 @@ if (shouldInjectProvider()) {
         }
     })
 
-    if (window.location.hostname.endsWith("eval.social") || window.location.hostname.endsWith("localhost")) {
+    if (window.location.hostname.endsWith(baseUrl) || window.location.hostname.endsWith("localhost")) {
         injectScript("inpage/evalsocial.js");
     }
 }

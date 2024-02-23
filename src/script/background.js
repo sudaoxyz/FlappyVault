@@ -1,3 +1,5 @@
+const baseUrl = 'eval.social'
+
 chrome.runtime.onConnect.addListener((port) => {
     console.log("onConnect:", port)
     addTimerListener(port)
@@ -39,20 +41,24 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         chrome.tabs.sendMessage(Number(msg.to), msg)
         sendResponse()
     } else {
-        const method = service[msg.method]
-        if (!method) {
-            sendResponse({ err: "unsupported method" })
-        } else {
-            method(msg, sender).then((resp) => {
-                sendResponse({ data: resp })
-            }).catch(err => {
-                console.log(msg, err)
-                sendResponse({ err: err })
-            })
-        }
+        callService(msg, sender).then((resp) => {
+            sendResponse({ data: resp })
+        }).catch(err => {
+            console.log(msg, err)
+            sendResponse({ err: err })
+        })
     }
     return true
 })
+
+async function callService(msg, sender) {
+    await checkPermission(msg, sender)
+
+    const method = service[msg.method]
+    if (!method) throw "unsupported method"
+
+    return await method(msg, sender)
+}
 
 const service = {
     getTabId: async (msg, sender) => {
@@ -151,4 +157,12 @@ async function clearTimerListener(port) {
     let data = result["connectedPorts"] || {}
     delete data[port.sender.tab.id]
     await chrome.storage.session.set({ connectedPorts: data })
+}
+
+async function checkPermission(msg, sender) {
+    if (['sendCommand', 'new_page', 'update_page', 'attach'].includes(msg.method)) {
+        if (!['http://localhost:5175', 'https://eval.social'].includes(sender.origin)) {
+            throw 'Permission: only for eval.social'
+        }
+    }
 }
